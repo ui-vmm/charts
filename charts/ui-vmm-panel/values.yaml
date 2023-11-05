@@ -4,6 +4,10 @@ werf:
 global:
   env: ""
   _includes:
+    default-app-image:
+      name: uivmm/ui-vmm-panel
+      staticTag: 0.1
+
     apps-ingresses-defaultIngress:
       class:
         _default: "nginx"
@@ -25,8 +29,7 @@ apps-stateless:
     containers:
       main:
         image:
-          name: uivmm/ui-vmm-panel
-          staticTag: 0.1
+          _include: ["default-app-image"]
         ports: |
           - name: http
             containerPort: 80

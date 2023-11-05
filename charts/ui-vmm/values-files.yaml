@@ -2,8 +2,8 @@ apps-configmaps:
   ui-vmm-config:
     enabled: true
     data:
-      _default: |
-        config.yaml: |
+      config.yaml:
+        _default: |
           ---
           listen: 0.0.0.0
           port: 7500

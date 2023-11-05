@@ -4,7 +4,11 @@ werf:
 global:
   env: ""
   _includes:
-    default-commonEnvs:
+    default-app-image:
+      name: uivmm/ui-vmm
+      staticTag: "0.1"
+
+    default-common-envs:
       db_host: postgresql
       db_name: postgres
       db_user: postgres
@@ -40,7 +44,7 @@ global:
         name: "{{ $.CurrentApp.name }}"
 
     apps-ingresses-defaultIngress:
-      class:
+      ingressClassName:
         _default: "nginx"
 
     apps-initContainers-wait-postgres:
@@ -80,7 +84,7 @@ apps-stateful:
     enabled: true
     reloader: false
     _commonEnvs:
-      _include: ["default-commonEnvs"]
+      _include: ["default-common-envs"]
     _storage:
       class_name: null
       size_gb:
@@ -142,13 +146,12 @@ apps-stateless:
     initContainers:
       _include: ["apps-initContainers-wait-postgres"]
     _commonEnvs:
-      _include: ["default-commonEnvs"]
+      _include: ["default-common-envs"]
     containers:
       main:
         imagePullPolicy: Always
         image:
-          name: uivmm/ui-vmm
-          staticTag: 0.1
+          _include: ["default-app-image"]
         ports: |
           - name: http
             containerPort: 7500
@@ -171,7 +174,7 @@ apps-ingresses:
     host: "{{ $.Values.global.ci_url }}"
     paths: |
       - path: /api/(.*)$
-        pathType: Prefix
+        pathType: ImplementationSpecific
         backend:
           service:
             name: ui-vmm
@@ -182,17 +185,18 @@ apps-jobs:
   migration:
     _include: ["default-volumes", "apps-jobs-defaultJob"]
     enabled: true
+    annotations: |
+      "helm.sh/hook": post-install, pre-upgrade
     initContainers:
       _include: ["apps-initContainers-wait-postgres"]
     _commonEnvs:
-      _include: ["default-commonEnvs"]
+      _include: ["default-common-envs"]
       job: true
     containers:
       main:
         enabled: true
         imagePullPolicy: Always
         image:
-          name: uivmm/ui-vmm
-          staticTag: 0.1
+          _include: ["default-app-image"]
         args: |
           - -migration
